@@ -1,24 +1,21 @@
 <script setup>
-import { RouterLink } from "vue-router";
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed} from "vue";
 import { useWindowsWidth } from "../assets/js/useWindowsWidth";
 import { defineProps } from 'vue';
-import MaterialButton from "../components/MaterialButton.vue";
-
+import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
 // images
 import ArrDark from "../assets/img/down-arrow-dark.svg";
 import DownArrWhite from "../assets/img/down-arrow-white.svg";
 
 const props = defineProps({
   action: {
-    type: Object,
+    type: Object, 
     route: String,
     color: String,
     label: String,
     default: () => ({
-      route: "https://www.creative-tim.com/product/vue-material-kit",
-      color: "bg-gradient-success",
-      label: "Free Download"
+      
     })
   },
   transparent: {
@@ -40,24 +37,38 @@ const props = defineProps({
   darkText: {
     type: Boolean,
     default: false
-  }
-});
-  // 초기값은 false로 설정되어 있으며, 사용자가 로그인되어 있지 않다고 가정합니다.
-  const userLoggedIn = ref(false); 
+  },
 
-  function handleLogin() {
-  // 로그인 처리 로직
-  userLoggedIn.value = true; // 사용자가 로그인한 상태로 설정
-  localStorage.setItem("userLoggedIn", true); // 사용자가 로그인한 상태를 로컬 스토리지에 저장
+});
+// Vuex store 사용
+const store = useStore();
+const router = useRouter();
+
+// mapGetters와 mapActions 사용
+const isAuthenticated = computed(() => store.getters.isAuthenticated);
+const getUser = computed(() => store.getters.getUser);
+const logout = () => store.dispatch('logout');
+
+// 사용자 이름 표시 로직
+const userNameDisplay = computed(() => {
+  if (isAuthenticated.value && getUser.value) {
+    const email = getUser.value.email || getUser.value;
+    const username = email.split('@')[0];
+    return username;
+  }
+  return "Hello";
+});
+function login() {
+  router.push({ name: 'Login' });
 }
 
 function handleLogout() {
-  // 로그아웃 처리 로직
-  userLoggedIn.value = false; // 사용자가 로그아웃한 상태로 설정
-  localStorage.removeItem("userLoggedIn"); // 로그인 상태를 로컬 스토리지에서 삭제
+  logout();
+  router.push({ name: 'Home' });
 }
+
   // set arrow  color
-function getArrowColor() {
+  function getArrowColor() {
     if (props.transparent && textDark.value) {
       return ArrDark;
     } else if (props.transparent) {
@@ -102,17 +113,7 @@ function getArrowColor() {
       }
     }
   );
-  const userNameDisplay = computed(() => {
-    const userLoggedIn = localStorage.getItem("userLoggedIn"); // 로그인 상태 확인
-    if (userLoggedIn.value) {
-      // 사용자가 로그인한 경우 사용자 이름을 표시합니다.
-      const userEmail = localStorage.getItem("userEmail");
-      return "UserName";
-    } else {
-      // 사용자가 로그인하지 않은 경우 기본 메시지 또는 빈 문자열을 표시합니다.
-      return "Hello, Guest!";
-    }
-  });
+  
 </script>
 
 <template>
@@ -127,13 +128,10 @@ function getArrowColor() {
       ' navbar-dark bg-gradient-dark z-index-3 py-3': props.dark
     }"
   >
-    <div
-      :class="
-        props.transparent || props.light || props.dark
+    <div :class="props.transparent || props.light || props.dark
           ? 'container'
-          : 'container-fluid px-0'
-      "
-    >
+          : 'container-fluid px-0'" >
+
       <RouterLink
         class="navbar-brand d-none d-md-block"
         :class="[
@@ -273,7 +271,7 @@ function getArrowColor() {
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-            <i><img src="../assets/img/iconimg1.png" /></i ><!-- 여기서 material-icons 아이콘을 사용 -->
+            <i><img src="../assets/img/iconimg1.png" /></i >
               Community 
               <img
                 :src="getArrowColor()"
@@ -347,8 +345,8 @@ function getArrowColor() {
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              <i><img src="../assets/img/iconimg1.png" /></i ><!-- 여기서 material-icons 아이콘을 사용 -->
-                {{ userNameDisplay }}
+              <i><img src="../assets/img/iconimg1.png" /></i >
+                 {{ userNameDisplay }}<!-- {{ userNameDisplay }}사용자 이름 또는 기본 메시지 표시 -->
               <img
                 :src="getArrowColor()"
                 alt="down-arrow"
@@ -443,16 +441,16 @@ function getArrowColor() {
           </li>
           <!-- Sections -->
         </ul>
-        <!-- 로그인 버튼 시작 해결 못함--> 
-        <ul class="navbar-nav d-lg-block d-none">
-          <li class="row justify-space-between text-center py-2 nav-item">
-            <div class="col-12 mx-auto">
-              <a href="/login" class="w-auto me-2">
-                <MaterialButton variant="outline" color="info" class="w-auto me-2 login-button-container">Login</MaterialButton>  
-              </a>    
-            </div>
-          </li>
-        </ul>
+        <!-- 로그인 버튼 시작 해결 중 06/05 00:26 am -->
+       
+        <div v-if="!isAuthenticated" class="auth-buttons">
+          <button @click="login" class="nav-link action-button">Login</button>
+        </div>
+        <div v-else class="auth-buttons">
+          <button @click="handleLogout" class="nav-link action-button">Logout</button>
+        </div>
+        
+        
         <!-- 로그인 버튼 끝 -->
       </div>
     </div>
@@ -464,4 +462,27 @@ function getArrowColor() {
   margin-top : 16px;
   margin-left: 8px;
 }
+.nav-link, .action-button {
+    color: #003a9a; /* 버튼 색상 */
+    text-decoration: none;
+    font-weight: bold;
+    background: none; /* 배경 제거 */
+    border: none; /* 테두리 제거 */
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .nav-link:hover, .action-button:hover {
+    text-decoration: underline;
+  }
+  
+  .auth-buttons {
+    display: flex;
+    align-items: center;
+  }
+  
+  .username {
+    font-weight: bold;
+    color: #003a9a;
+  }
 </style>
