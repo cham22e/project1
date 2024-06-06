@@ -4,7 +4,7 @@ import { useWindowsWidth } from "../assets/js/useWindowsWidth";
 import { defineProps } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-// images
+
 import ArrDark from "../assets/img/down-arrow-dark.svg";
 import DownArrWhite from "../assets/img/down-arrow-white.svg";
 
@@ -18,35 +18,18 @@ const props = defineProps({
       
     })
   },
-  transparent: {
-    type: Boolean,
-    default: false
-  },
-  light: {
-    type: Boolean,
-    default: false
-  },
-  dark: {
-    type: Boolean,
-    default: false
-  },
-  sticky: {
-    type: Boolean,
-    default: false
-  },
-  darkText: {
-    type: Boolean,
-    default: false
-  },
-
+  transparent: { type: Boolean, default: false },
+  light: { type: Boolean, default: false },
+  dark: { type: Boolean, default: false },
+  sticky: { type: Boolean, default: false },
+  darkText: { type: Boolean, default: false },
 });
-// Vuex store 사용
 const store = useStore();
 const router = useRouter();
 
-// mapGetters와 mapActions 사용
 const isAuthenticated = computed(() => store.getters.isAuthenticated);
 const getUser = computed(() => store.getters.getUser);
+
 const logout = () => store.dispatch('logout');
 
 // 사용자 이름 표시 로직
@@ -58,6 +41,7 @@ const userNameDisplay = computed(() => {
   }
   return "Hello";
 });
+
 function login() {
   router.push({ name: 'Login' });
 }
@@ -67,53 +51,51 @@ function handleLogout() {
   router.push({ name: 'Home' });
 }
 
-  // set arrow  color
-  function getArrowColor() {
-    if (props.transparent && textDark.value) {
-      return ArrDark;
-    } else if (props.transparent) {
-      return DownArrWhite;
-    } else {
-      return ArrDark;
-    }
+// set arrow  color
+function getArrowColor() {
+  if (props.transparent && textDark.value) {
+    return ArrDark;
+  } else if (props.transparent) {
+    return DownArrWhite;
+  } else {
+    return ArrDark;
+  }
 }
 
   // set text color
-  const getTextColor = () => {
-    let color;
-    if (props.transparent && textDark.value) {
-        color = "text-dark";
-      } else if (props.transparent) {
-        color = "text-white";
-      } else {
-        color = "text-dark";
-      }
-
-      return color;
-  };
-
-  // set nav color on mobile && desktop
-
-  let textDark = ref(props.darkText);
-  const { type } = useWindowsWidth();
-
-  if (type.value === "mobile") {
-        textDark.value = true;
-      } else if (type.value === "desktop" && textDark.value == false) {
-        textDark.value = false;
-  }
-
-  watch(
-    () => type.value,
-    (newValue) => {
-      if (newValue === "mobile") {
-        textDark.value = true;
-      } else {
-        textDark.value = false;
-      }
+const getTextColor = () => {
+  let color;
+  if (props.transparent && textDark.value) {
+      color = "text-dark";
+    } else if (props.transparent) {
+      color = "text-white";
+    } else {
+      color = "text-dark";
     }
-  );
-  
+
+    return color;
+};
+
+let textDark = ref(props.darkText);
+const { type } = useWindowsWidth();
+
+if (type.value === "mobile") {
+      textDark.value = true;
+    } else if (type.value === "desktop" && textDark.value == false) {
+      textDark.value = false;
+}
+
+watch(
+  () => type.value,
+  (newValue) => {
+    if (newValue === "mobile") {
+      textDark.value = true;
+    } else {
+      textDark.value = false;
+    }
+  }
+);
+
 </script>
 
 <template>
@@ -441,7 +423,7 @@ function handleLogout() {
           </li>
           <!-- Sections -->
         </ul>
-        <!-- 로그인 버튼 시작 해결 중 06/05 00:26 am -->
+        <!-- 로그인 버튼 -->
        
         <div v-if="!isAuthenticated" class="auth-buttons">
           <button @click="login" class="nav-link action-button">Login</button>

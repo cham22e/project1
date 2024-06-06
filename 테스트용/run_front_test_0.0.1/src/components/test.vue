@@ -1,3 +1,4 @@
+<!-- 사용 안함 -->
 <template>
     <nav class="navbar">
       <router-link to="/" class="nav-link">Home</router-link>

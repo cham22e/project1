@@ -1,5 +1,6 @@
 <template>
   <div class="materialContainer">
+    
     <div class="box">
       <div class="title">LOGIN</div>
 
@@ -45,7 +46,7 @@
 
 <script>
 import axios from "axios";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
   data() {
@@ -54,6 +55,12 @@ export default {
       password: "",
       errorMessage: "",
     };
+  },
+  computed: {
+    ...mapGetters(['getAlertStatus']), // Vuex 스토어의 경고 상태를 가져옴
+    showAlert() {
+      return this.getAlertStatus;
+    },
   },
   methods: {
     ...mapActions(["login"]),

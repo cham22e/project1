@@ -4,13 +4,14 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store"; // store 가져오기
 
+// FontAwesome 아이콘 임포트
+import '@fortawesome/fontawesome-free/css/all.css';
 
 // Nucleo Icons
 import "./assets/css/nucleo-icons.css";
 import "./assets/css/nucleo-svg.css";
 
 import materialKit from "./material-kit";
-import '@mdi/font/css/materialdesignicons.css';
 
 const app = createApp(App);
 app.use(router);

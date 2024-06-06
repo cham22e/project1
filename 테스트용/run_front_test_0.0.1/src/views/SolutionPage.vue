@@ -19,9 +19,9 @@
       </div>
 
       <div class="right-pane">
-        <div v-if="problemSolution">
-          <h3>문제 해답:</h3>
-          <pre>{{ problemSolution }}</pre>
+        <div v-if="gradedCode">
+          <h3>채점된 소스 코드:</h3>
+          <pre>{{ gradedCode }}</pre>
         </div>
       </div>
     </div>
@@ -46,23 +46,14 @@ export default {
       feedback: '',
       showUserProblems: false,
       gradingResult: '',
-      problemSolution: ''
+      gradedCode: ''
     };
-  },
-  mounted() {
-    axios.get('/user/problems')
-      .then(response => {
-        this.userProblems = response.data;
-      })
-      .catch(error => {
-        console.error('문제 목록을 불러오는 중 에러 발생: ', error);
-      });
   },
   methods: {
     selectProblem(problem) {
       this.selectedProblem = problem;
       this.gradingResult = '';
-      this.problemSolution = '';
+      this.gradedCode = '';
     },
     submitCode() {
       axios.post('/grade', {
@@ -72,6 +63,7 @@ export default {
         .then(response => {
           console.log('채점 결과:', response.data);
           this.gradingResult = `채점 결과: '${response.data}'`;
+          this.gradedCode = response.data; // 채점된 소스 코드 저장
         })
         .catch(error => {
           console.error('채점 요청 중 에러 발생: ', error);
@@ -84,7 +76,7 @@ export default {
         })
         .then(response => {
           console.log('챗 지피티 피드백:', response.data);
-          this.problemSolution = response.data.solution;
+          this.gradedCode = response.data.solution; // 피드백된 소스 코드 저장
         })
         .catch(error => {
           console.error('문제 풀이 요청 중 에러 발생: ', error);
