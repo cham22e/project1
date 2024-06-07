@@ -22,18 +22,22 @@
           게시글 작성
         </Button>
       </div>
-        
     </div>
+
     <div class="community-posts">
-      <div v-for="post in posts" :key="post.id" class="post">
-        <h3 class="post-title">{{ post.title }}</h3>
-        <p class="post-content">{{ post.content }}</p>
+      <div v-for="(post, index) in posts" :key="post.id" class="post">
+        <!-- 제목을 클릭하면 toggleDetail 함수 호출 -->
+        <h3 class="post-title" @click="toggleDetail(post.id)">{{ index + 1 }}.   {{ post.title }}</h3>
+        <!-- 게시글 내용 -->
+        <p v-if="selectedPostId === post.id" class="post-content">{{ post.content }}</p>
+        <!-- 작성자 이름과 날짜 -->
         <div class="post-meta">
-          <span class="post-author">{{ post.author }}</span>
+          <span class="post-author">{{ post.Username }}</span>
           <span class="post-date">{{ post.date }}</span>
         </div>
       </div>
     </div>
+
   </div>
   <!-- 페이지네이션 컴포넌트 추가 -->
   <section class="py-7">
@@ -62,47 +66,70 @@
 </template>
 
 <script>
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 import MaterialPagination from "../components/MaterialPagination.vue";
 import MaterialPaginationItem from "../components/MaterialPaginationItem.vue";
 import MaterialInput from "../components/MaterialInput.vue";
 
 export default {
-  data() {
-    return {
-      posts: [
-        { id: 1, title: '게시물 제목 1', content: '게시물 내용 1', author: '작성자1', date: '2024-06-06' },
-        { id: 2, title: '게시물 제목 2', content: '게시물 내용 2', author: '작성자2', date: '2024-06-05' },
-        { id: 3, title: '게시물 제목 3', content: '게시물 내용 3', author: '작성자3', date: '2024-06-04' },
-        // 다른 게시물들도 추가할 수 있습니다.
-      ],
-      searchQuery: '',
-      
+  setup() {
+    const store = useStore();
+    const posts = computed(() => store.getters.getPosts);
+    const searchQuery = ref('');
+    const router = useRouter();
+    const selectedPostId = ref(null);
+
+    const searchPosts = () => {
+      if (searchQuery.value.trim() === '') {
+        return posts.value;
+      } else {
+        return posts.value.filter(post =>
+          post.title.toLowerCase().includes(searchQuery.value.trim().toLowerCase())
+        );
+      }
     };
-  },
-  methods: {
-    goToWritePage() {
-      if (this.$store.getters.isAuthenticated) {
-        this.$router.push(`/writepagetest`);
+
+    const goToWritePage = () => {
+      if (store.getters.isAuthenticated) {
+        router.push(`/userwritepage`);
       } else {
         alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
-        console.log("로그인된 유저가 없습니다.");
-        this.$store.dispatch('goToLoginPage');
+        store.dispatch('goToLoginPage');
       }
-    },
-    searchPosts() {
-      // TODO: 게시물 검색하는 기능을 구현합니다.
-      console.log("게시물을 검색합니다.");
-    }
-},
+    };
+
+    const addNewPost = (post) => {
+      const user = store.getters.getUser;
+      post.Username = user ? user.username : "익명";
+      store.dispatch('addPost', post);
+    };
+
+    const toggleDetail = (postId) => {
+      // 클릭한 게시글의 ID를 저장하여 해당 게시글의 내용만 표시
+      selectedPostId.value = selectedPostId.value === postId ? null : postId;
+    };
+
+    return {
+      posts: computed(() => searchPosts()),
+      searchQuery,
+      goToWritePage,
+      addNewPost,
+      toggleDetail,
+      selectedPostId,
+    };
+  },
   components: {
     MaterialPagination,
     MaterialPaginationItem,
     MaterialInput,
-    
-  }
+  },
 };
 
 </script>
+
+
 <style scoped>
 .community {
   max-width: 800px;
@@ -157,14 +184,13 @@ export default {
 }
 
 .community-posts {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  display: block;
 }
 
 .post {
   border: 1px solid #ccc;
   padding: 20px;
+  margin-bottom: 20px;
 }
 
 .post h3 {
@@ -174,6 +200,7 @@ export default {
 .post-title {
   font-size: 1.2em;
   margin-bottom: 8px;
+  cursor: pointer;
 }
 
 .post-content {

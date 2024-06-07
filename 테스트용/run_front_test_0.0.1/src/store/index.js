@@ -2,6 +2,11 @@
 import { createStore } from 'vuex';
 import router from '../router';
 
+const loadPostsFromLocalStorage = () => {
+  const postsFromLocalStorage = localStorage.getItem('posts');
+  return postsFromLocalStorage ? JSON.parse(postsFromLocalStorage) : [];
+};
+
 const skillFromLocalStorage = localStorage.getItem('skill');
 let skill = {};
 
@@ -23,6 +28,7 @@ const store = createStore({
     alertMessage: '',
     isLoggedIn: !!localStorage.getItem('token'),
     comments: [], // 변경된 부분: 댓글 목록을 추가하는 state 추가
+    
   },
   mutations: {
     setUser(state, user) {
@@ -64,6 +70,14 @@ const store = createStore({
         state.comments.splice(index, 1, updatedComment);
       }
     },
+    // 새로운 게시글 추가를 위한 mutation
+    addPost(state, post) {
+      state.posts.push(post);
+    },
+    setPosts(state, posts) {
+      state.posts = posts;
+      localStorage.setItem('posts', JSON.stringify(posts)); // 로컬 스토리지에 게시글 목록 저장
+    },
   },
   actions: {
     login({ commit }, { user, token, skill }) {
@@ -79,10 +93,7 @@ const store = createStore({
       router.push('/login'); // 로그인 페이지로 이동합니다.
     },
     async fetchPosts({ commit }) {
-      const posts = [
-        { id: 1, title: 'First Post' },
-        { id: 2, title: 'Second Post' },
-      ];
+      const posts = loadPostsFromLocalStorage();
       commit('setPosts', posts);
     },
     async fetchComments({ commit }, postId) {
@@ -136,6 +147,12 @@ const store = createStore({
         console.error('댓글을 삭제하는 중 에러 발생:', error);
       }
     },
+    // 새로운 게시글 추가를 위한 action
+    
+    addPost({ commit, state }, newPost) {
+      const updatedPosts = [...state.posts, newPost];
+      commit('setPosts', updatedPosts);
+    },
   },
   getters: {
     isAuthenticated: state => !!state.user,
@@ -144,6 +161,9 @@ const store = createStore({
     getPosts: state => state.posts,
     getAlertStatus: state => ({ status: state.showAlert, message: state.alertMessage }),
     getComments: state => state.comments,
+    getPostById: state => postId => {
+      return state.posts.find(post => post.id === postId);
+    },
   },
 });
 

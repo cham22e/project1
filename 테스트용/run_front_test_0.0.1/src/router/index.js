@@ -10,7 +10,7 @@ import LoginPage from "../views/LoginPage.vue";
 import RegisterPage from "../views/RegisterPage.vue";
 import WritePage from "../views/WritePage.vue";
 import MyPage from "../views/MyPage.vue";
-import WritePageTest from "@/views/WritePageTest.vue";
+import UserWritePage from "@/views/UserWritePage.vue";
 
 const routes = [
   { path: "/", name: "Home", component: HomePage },
@@ -22,7 +22,7 @@ const routes = [
   { path: "/register", name: "Register", component: RegisterPage },
   { path: "/write/:id?", name: "Write", component: WritePage },
   { path: "/mypage", name: "MyPage", component: MyPage },
-  { path: "/writepagetest", name:"WritePageTest", component: WritePageTest},
+  { path: "/userwritepage", name:"UserWritePage", component: UserWritePage},
 ];
 
 const router = createRouter({

@@ -2,6 +2,7 @@
   <div class="container">
     <h1>Register Problem Page</h1>
     <p>Users can submit new problems here.</p>
+    <p>Only users with advanced user permissions can use it.</p>
     <router-link to="/">Click to Home</router-link>
   </div>
 </template>
