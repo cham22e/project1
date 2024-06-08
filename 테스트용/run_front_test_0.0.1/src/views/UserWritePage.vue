@@ -46,7 +46,7 @@ export default {
       const newPost = {
         title: titleValue,
         content: contentValue,
-        author: '사용자', // 사용자 정보를 추가해주세요.
+        author: store.getters.getUser ? store.getters.getUser.username : '익명', // 사용자 이름 가져오기
         date: new Date().toISOString(), // 현재 날짜를 ISO 문자열로 변환하여 추가합니다.
       };
 

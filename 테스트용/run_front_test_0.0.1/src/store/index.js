@@ -6,7 +6,10 @@ const loadPostsFromLocalStorage = () => {
   const postsFromLocalStorage = localStorage.getItem('posts');
   return postsFromLocalStorage ? JSON.parse(postsFromLocalStorage) : [];
 };
-
+const generatePostId = () => {
+  // 랜덤한 ID 생성 (간단하게 현재 시간을 기반으로 생성)
+  return Date.now().toString();
+};
 const skillFromLocalStorage = localStorage.getItem('skill');
 let skill = {};
 
@@ -72,6 +75,7 @@ const store = createStore({
     },
     // 새로운 게시글 추가를 위한 mutation
     addPost(state, post) {
+      post.id = generatePostId();
       state.posts.push(post);
     },
     setPosts(state, posts) {
@@ -138,6 +142,7 @@ const store = createStore({
         console.error('댓글을 수정하는 중 에러 발생:', error);
       }
     },
+    
     async deleteComment({ commit }, commentId) {
       // commentId에 해당하는 댓글을 서버에서 삭제
       try {
@@ -150,8 +155,10 @@ const store = createStore({
     // 새로운 게시글 추가를 위한 action
     
     addPost({ commit, state }, newPost) {
+      newPost.id = generatePostId(); // 새로운 ID 생성
       const updatedPosts = [...state.posts, newPost];
       commit('setPosts', updatedPosts);
+      router.push({ name: 'SelectedPostPage', params: { postId: newPost.id } });
     },
   },
   getters: {

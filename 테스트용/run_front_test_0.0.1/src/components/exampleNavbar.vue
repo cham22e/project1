@@ -291,6 +291,12 @@ watch(
                       >
                         <span>Regist</span>
                       </RouterLink>
+                      <RouterLink
+                        :to="{ name: 'ListEx' }"
+                        class="dropdown-item border-radius-md"
+                      >
+                        <span>List</span>
+                      </RouterLink>
                     </div>
                   </div>
                 </div>

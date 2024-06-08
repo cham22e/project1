@@ -3,49 +3,38 @@
     <div class="community-header">
       <h2>커뮤니티 게시판</h2>
       <div class="header-actions">
-        <!-- 검색 입력 부분 교체 -->
         <MaterialInput
           class="search-input"
           icon="search"
           type="text"
           v-model="searchQuery"
           placeholder="검색어 입력"
-          size="sm"  
+          size="sm"
         />
-        
-        <!-- 수정된 부분: 검색 버튼에 컴포넌트 적용 -->
-        <Button class="btn-search" @click="searchPosts">
-          검색
-        </Button>
-        <!-- 수정된 부분: 글 쓰기 버튼에 컴포넌트 적용 -->
-        <Button class="btn-write"  @click="goToWritePage">  
-          게시글 작성
-        </Button>
+        <button class="btn-search" @click="searchPosts">검색</button>
+        <button class="btn-write" @click="goToWritePage">게시글 작성</button>
       </div>
     </div>
 
     <div class="community-posts">
-      <div v-for="(post, index) in posts" :key="post.id" class="post">
-        <!-- 제목을 클릭하면 toggleDetail 함수 호출 -->
-        <h3 class="post-title" @click="toggleDetail(post.id)">{{ index + 1 }}.   {{ post.title }}</h3>
-        <!-- 게시글 내용 -->
-        <p v-if="selectedPostId === post.id" class="post-content">{{ post.content }}</p>
-        <!-- 작성자 이름과 날짜 -->
-        <div class="post-meta">
-          <span class="post-author">{{ post.Username }}</span>
-          <span class="post-date">{{ post.date }}</span>
+      <div v-if="selectedPostId === null">
+        <div v-for="(post, index) in filteredPosts" :key="post.id" class="post">
+          <router-link :to="{ name: 'SelectedPostPage', params: { postId: post.id } }" class="post-title">
+            {{ index + 1 }}. {{ post.title }}
+          </router-link>
+          <div class="post-meta">
+            <span class="post-author">{{ post.Username }}</span>
+            <span class="post-date">{{ formatDate(post.date) }}</span>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
-  <!-- 페이지네이션 컴포넌트 추가 -->
   <section class="py-7">
     <div class="container">
       <div class="row justify-space-between py-2">
         <div class="col-lg-4 mx-auto">
           <MaterialPagination>
-            <!-- 이전 버튼을 '<<'로 설정 -->
             <MaterialPaginationItem prev class="ms-auto">
               <i class="fas fa-angle-double-left"></i>
             </MaterialPaginationItem>
@@ -54,7 +43,6 @@
             <MaterialPaginationItem label="3" />
             <MaterialPaginationItem label="4" />
             <MaterialPaginationItem label="5" />
-            <!-- 다음 버튼을 '>>'로 설정 -->
             <MaterialPaginationItem next>
               <i class="fas fa-angle-double-right"></i>
             </MaterialPaginationItem>
@@ -69,55 +57,93 @@
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import MaterialPagination from "../components/MaterialPagination.vue";
-import MaterialPaginationItem from "../components/MaterialPaginationItem.vue";
-import MaterialInput from "../components/MaterialInput.vue";
+import MaterialPagination from '../components/MaterialPagination.vue';
+import MaterialPaginationItem from '../components/MaterialPaginationItem.vue';
+import MaterialInput from '../components/MaterialInput.vue';
 
 export default {
   setup() {
     const store = useStore();
-    const posts = computed(() => store.getters.getPosts);
     const searchQuery = ref('');
     const router = useRouter();
     const selectedPostId = ref(null);
 
-    const searchPosts = () => {
+    const filteredPosts = computed(() => {
+      const posts = store.getters.getPosts;
       if (searchQuery.value.trim() === '') {
-        return posts.value;
+        return posts;
       } else {
-        return posts.value.filter(post =>
+        return posts.filter(post =>
           post.title.toLowerCase().includes(searchQuery.value.trim().toLowerCase())
         );
+      }
+    });
+
+    const searchPosts = () => {
+      const matchingPost = filteredPosts.value[0];
+      if (matchingPost) {
+        selectedPostId.value = matchingPost.id;
+      } else {
+        alert('검색어에 해당하는 게시글이 없습니다.');
       }
     };
 
     const goToWritePage = () => {
       if (store.getters.isAuthenticated) {
-        router.push(`/userwritepage`);
+        router.push('/userwritepage');
       } else {
         alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
         store.dispatch('goToLoginPage');
       }
     };
 
-    const addNewPost = (post) => {
+    const addNewPost = post => {
       const user = store.getters.getUser;
-      post.Username = user ? user.username : "익명";
+      post.Username = user ? user.username : '익명';
       store.dispatch('addPost', post);
     };
 
-    const toggleDetail = (postId) => {
-      // 클릭한 게시글의 ID를 저장하여 해당 게시글의 내용만 표시
-      selectedPostId.value = selectedPostId.value === postId ? null : postId;
+    const toggleDetail = postId => {
+      if (selectedPostId.value === postId) {
+        selectedPostId.value = null;
+      } else {
+        selectedPostId.value = postId;
+      }
+    };
+
+    const clearSelectedPost = () => {
+      selectedPostId.value = null;
+    };
+
+    const formatDate = dateString => {
+      const date = new Date(dateString);
+      return `${date.getFullYear()}-${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${date
+        .getDate()
+        .toString()
+        .padStart(2, '0')} ${date
+        .getHours()
+        .toString()
+        .padStart(2, '0')}:${date
+        .getMinutes()
+        .toString()
+        .padStart(2, '0')}`;
     };
 
     return {
-      posts: computed(() => searchPosts()),
+      filteredPosts,
       searchQuery,
+      searchPosts,
       goToWritePage,
       addNewPost,
       toggleDetail,
       selectedPostId,
+      formatDate,
+      clearSelectedPost,
+      selectedPost: computed(() =>
+        store.getters.getPosts.find(post => post.id === selectedPostId.value)
+      ),
     };
   },
   components: {
@@ -126,7 +152,6 @@ export default {
     MaterialInput,
   },
 };
-
 </script>
 
 
@@ -152,6 +177,7 @@ export default {
 .header-actions button {
   margin-left: 8px;
 }
+
 .btn-write, .btn-search {
   color: #003a9a; /* 기본 글씨 색상 */
   border: 1px solid #003a9a; /* 기본 테두리 색상 */

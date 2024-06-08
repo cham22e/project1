@@ -8,9 +8,10 @@ import RegisterProblemPage from "../views/RegisterProblemPage.vue";
 import SolutionPage from "../views/SolutionPage.vue";
 import LoginPage from "../views/LoginPage.vue";
 import RegisterPage from "../views/RegisterPage.vue";
-import WritePage from "../views/WritePage.vue";
 import MyPage from "../views/MyPage.vue";
-import UserWritePage from "@/views/UserWritePage.vue";
+import UserWritePage from "../views/UserWritePage.vue";
+import SelectedPostPage from "../views/SelectedPostPage.vue"
+import ListEx from "../views/ListEx.vue"
 
 const routes = [
   { path: "/", name: "Home", component: HomePage },
@@ -20,9 +21,10 @@ const routes = [
   { path: "/solution", name: "Solution", component: SolutionPage },
   { path: "/login", name: "Login", component: LoginPage },
   { path: "/register", name: "Register", component: RegisterPage },
-  { path: "/write/:id?", name: "Write", component: WritePage },
   { path: "/mypage", name: "MyPage", component: MyPage },
-  { path: "/userwritepage", name:"UserWritePage", component: UserWritePage},
+  { path: "/userwritepage", name: "UserWritePage", component: UserWritePage },
+  { path: '/post/:postId', name: 'SelectedPostPage', component: SelectedPostPage, props: true },
+  { path: '/ListEx', name: 'ListEx', component: ListEx}
 ];
 
 const router = createRouter({
