@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import store from '../store';
+/*import store from '../store';*/
 
 import HomePage from "../views/HomePage.vue";
 import QuizPage from "../views/QuizPage.vue";
@@ -31,7 +31,7 @@ const router = createRouter({
   history: createWebHistory(process.env.VUE_APP_BASE_URL),
   routes,
 });
-
+/*
 router.beforeEach((to, from, next) => {
   const isLoggedIn = store.state.isLoggedIn;
   const requiresAuthPaths = ['/quiz', '/solution', '/register-problem', '/mypage'];
@@ -41,6 +41,6 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
-});
+});*/
 
 export default router;

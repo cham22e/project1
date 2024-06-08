@@ -1,6 +1,5 @@
 <template>
   <div class="materialContainer">
-    
     <div class="box">
       <div class="title">LOGIN</div>
 
@@ -28,15 +27,15 @@
         <span class="spin"></span>
       </div>
 
-      <!-- 작용버튼들임 -->
-      <div class="button">
+      <!-- 작용 버튼들 -->
+      <div class="button login">
         <button @click="handleLogin">LOGIN</button>
       </div>
-      <div class="button">
+      <div class="button register">
         <button @click="$router.push({ name: 'Register' })">Register</button>
       </div>
 
-      <!-- 로그인에러  -->
+      <!-- 로그인 에러 -->
       <div class="error" v-if="errorMessage">{{ errorMessage }}</div>
 
       <a href="#" class="pass-forgot">Forgot your password?</a>
@@ -46,7 +45,7 @@
 
 <script>
 import axios from "axios";
-import { mapActions, mapGetters } from "vuex";
+import { mapActions } from "vuex";
 
 export default {
   data() {
@@ -55,12 +54,6 @@ export default {
       password: "",
       errorMessage: "",
     };
-  },
-  computed: {
-    ...mapGetters(['getAlertStatus']), // Vuex 스토어의 경고 상태를 가져옴
-    showAlert() {
-      return this.getAlertStatus;
-    },
   },
   methods: {
     ...mapActions(["login"]),
@@ -76,28 +69,33 @@ export default {
             password: this.password,
           }
         );
+        console.log("서버 응답:", response.data); // 서버 응답 전체 확인
         if (response.data.access_token) {
           localStorage.setItem("authToken", response.data.access_token);
           localStorage.setItem("userEmail", this.email);
-          localStorage.setItem("userLoggedIn", true); // 사용자가 로그인한 상태를 표시하는 플래그 저장
+          // 이메일에서 닉네임 추출
+          const username = this.email.split('@')[0];
+          console.log("닉네임:", username); // 콘솔 로그 추가
           this.login({
             user: this.email,
             token: response.data.access_token,
             skill: response.data.skill,
+            username: username, // 추출한 닉네임 사용
           });
           this.$router.push("/");
         } else {
           this.errorMessage =
-            "Login succeeded but no access token was returned.";
+            "로그인은 성공했으나 액세스 토큰이 반환되지 않았습니다.";
         }
       } catch (error) {
         this.errorMessage =
-          "Login failed: " + (error.response?.data?.detail || "Unknown error");
+          "로그인 실패: " + (error.response?.data?.detail || "알 수 없는 오류");
       }
     },
   },
 };
 </script>
+
 
 <style scoped>
 .box {
@@ -136,14 +134,12 @@ export default {
   position: relative;
   height: 60px;
   top: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
+  border: none;
   background: transparent;
   font-family: "Roboto", sans-serif;
   font-size: 24px;
   color: rgba(0, 0, 0, 0.8);
   font-weight: 300;
-  width: 100%;
 }
 
 .input span.spin {
@@ -212,5 +208,19 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.error {
+  color: red;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pass-forgot {
+  margin-top: 20px;
+  display: block;
+  text-align: center;
+  color: #003a9a;
+  text-decoration: none;
 }
 </style>

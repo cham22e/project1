@@ -3,25 +3,62 @@
     <div class="box">
       <div class="title">REGISTER</div>
 
-      <!-- 회원가입할때 정보 기입 -->
+      <!-- 회원가입할 때 정보 기입 -->
       <div class="input">
-        <input type="text" name="regname" id="regname" v-model="regUsername" placeholder="Username" @input="clearErrors" />
+        <input
+          type="text"
+          name="regname"
+          id="regname"
+          v-model="regUsername"
+          placeholder="Username"
+          @input="clearErrors"
+        />
         <span class="spin"></span>
       </div>
       <div class="input">
-        <input type="password" name="regpass" id="regpass" v-model="regPassword" placeholder="Password" @input="clearErrors" />
+        <input
+          type="password"
+          name="regpass"
+          id="regpass"
+          v-model="regPassword"
+          placeholder="Password"
+          @input="clearErrors"
+        />
         <span class="spin"></span>
       </div>
       <div class="input">
-        <input type="password" name="reregpass" id="reregpass" v-model="regRepeatPassword" placeholder="Repeat Password" @input="clearErrors" />
+        <input
+          type="password"
+          name="reregpass"
+          id="reregpass"
+          v-model="regRepeatPassword"
+          placeholder="Repeat Password"
+          @input="clearErrors"
+        />
         <span class="spin"></span>
       </div>
       <div class="input">
-        <input type="email" name="regemail" id="regemail" v-model="regEmail" placeholder="Email" @input="clearErrors" />
+        <input
+          type="email"
+          name="regemail"
+          id="regemail"
+          v-model="regEmail"
+          placeholder="Email"
+          @input="clearErrors"
+        />
         <span class="spin"></span>
       </div>
       <div class="input">
-        <input type="number" name="regskill" id="regskill" v-model="regSkill" min="1" max="10" placeholder="Skill Level (1-10)" @input="clearErrors" />
+        <input
+          type="number"
+          name="regskill"
+          id="regskill"
+          v-model="regSkill"
+          min="1"
+          max="10"
+          placeholder="Skill Level (1-10)"
+          @input="clearErrors"
+        />
         <span class="spin"></span>
       </div>
 
@@ -34,52 +71,52 @@
   </div>
 </template>
 
-
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   data() {
     return {
-      regUsername: "",                // 사용자 이름
-      regPassword: "",                // 비밀번호
-      regRepeatPassword: "",          // 비밀번호 확인
-      regEmail: "",                   // 이메일
-      regSkill: "",                   // 스킬 레벨
-      errorMessage: ""                // 오류 메시지
+      regUsername: "",
+      regPassword: "",
+      regRepeatPassword: "",
+      regEmail: "",
+      regSkill: "", // skill 레벨 데이터를 저장할 변수
+      errorMessage: ""
     };
   },
   methods: {
     clearErrors() {
-      this.errorMessage = "";        // 오류 메시지 초기화
+      this.errorMessage = "";
     },
     async register() {
       if (this.regPassword !== this.regRepeatPassword) {
-        this.errorMessage = "비밀번호가 일치하지 않습니다.";    // 비밀번호 불일치 오류 메시지 설정
+        this.errorMessage = "비밀번호가 일치하지 않습니다.";
         return;
       }
-      const skillLevel = parseInt(this.regSkill);
-      if (isNaN(skillLevel) || skillLevel < 1 || skillLevel > 10) {
-        this.errorMessage = "Skill 레벨은 1에서 10 사이의 숫자여야 합니다.";    // 스킬 레벨 유효성 검사 오류 메시지 설정
+      if (this.regSkill < 1 || this.regSkill > 10) {
+        this.errorMessage = "Skill 레벨은 1에서 10 사이의 숫자여야 합니다.";
         return;
       }
       try {
-        const response = await axios.post('https://destiny-back-63f6h32ypq-de.a.run.app/blue/account/create_account', {
-          username: this.regUsername,   // 사용자 이름 전송
-          email: this.regEmail,         // 이메일 전송
-          password: this.regPassword,   // 비밀번호 전송
-          skill: skillLevel             // 스킬 레벨 전송
-        });
-        console.log('회원가입 성공:', response.data);
-        this.$router.push('/');         // 홈페이지로 리디렉션
+        const response = await axios.post(
+          "https://destiny-back-63f6h32ypq-de.a.run.app/blue/account/create_account",
+          {
+            email: this.regEmail,
+            password: this.regPassword,
+            skill: this.regSkill
+          }
+        );
+        console.log("회원가입 성공:", response.data);
+        this.$router.push("/"); // 홈페이지로 리디렉션
       } catch (error) {
-        this.errorMessage = "회원가입 실패: " + (error.response?.data.detail || "알 수 없는 오류");  // 회원가입 실패 오류 메시지 설정
+        this.errorMessage =
+          "회원가입 실패: " + (error.response?.data?.detail || "알 수 없는 오류");
       }
     }
   }
-}
+};
 </script>
-
 
 
 <style scoped>
@@ -119,18 +156,14 @@ export default {
   position: relative;
   height: 60px;
   top: 10px;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
+  border: none;
   background: transparent;
   font-family: "Roboto", sans-serif;
   font-size: 24px;
   color: rgba(0, 0, 0, 0.8);
   font-weight: 300;
-  width : 100%;
 }
-.input input[type="number"] {
-  width: 55%; /* 기존 100%에서 변경 */
-}
+
 .input span.spin {
   position: absolute;
   bottom: 0;
