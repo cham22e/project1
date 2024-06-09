@@ -27,7 +27,9 @@ const store = createStore({
     showAlert: false,
     alertMessage: '',
     isLoggedIn: !!localStorage.getItem('token'),
-    comments: [], // 변경된 부분: 댓글 목록을 추가하는 state 추가
+    comments: [], // comments 초기화
+    searchQuery: '',
+    filteredPosts: []
   },
   mutations: {
     setUser(state, user) {
@@ -58,7 +60,10 @@ const store = createStore({
       state.comments = comments;
     },
     addComment(state, comment) {
-      state.comments.push(comment);
+      const post = state.posts.find(post => post.id === comment.postId);
+      if (post) {
+        post.comments.push(comment);
+      }
     },
     deleteComment(state, commentId) {
       state.comments = state.comments.filter(comment => comment.id !== commentId);
@@ -69,15 +74,25 @@ const store = createStore({
         state.comments.splice(index, 1, updatedComment);
       }
     },
-    // 새로운 게시글 추가를 위한 mutation
+    
     addPost(state, post) {
       post.id = Date.now().toString(); // 새로운 ID 생성
       state.posts.push(post);
       router.push({ name: 'SelectedPostPage', params: { postId: post.id } });
     },
     setPosts(state, posts) {
-      state.posts = posts;
-      localStorage.setItem('posts', JSON.stringify(posts)); // 로컬 스토리지에 게시글 목록 저장
+      state.posts = posts.map(post => ({
+        ...post,
+        comments: post.comments || []
+      }));
+      localStorage.setItem('posts', JSON.stringify(state.posts));
+    },
+    // 검색 기능
+    setSearchQuery(state, query){
+      state.searchQuery = query;
+    },
+    setFilteredPosts(state, posts){
+      state.filteredPosts = posts;
     },
   },
   actions: {
@@ -112,28 +127,17 @@ const store = createStore({
         console.error('댓글을 불러오는 중 에러 발생:', error);
       }
     },
-    async addComment({ commit }, comment) {
-      // comment를 서버에 전송하고 추가
+    async addComment({ commit, dispatch }, { postId, comment }) {
       try {
-        // 서버에 댓글을 추가하는 비동기 작업을 수행합니다.
-        // 성공하면 추가된 댓글의 정보를 받아옵니다.
-        const addedComment = {
-          // 추가된 댓글의 정보를 적절히 설정합니다.
-          id: 3, // 예시로 3번 댓글이 추가되었다고 가정합니다.
-          postId: comment.postId,
-          content: comment.content,
-          // 추가할 댓글의 다른 정보가 있다면 추가합니다.
-        };
-        commit('addComment', addedComment);
+        comment.postId = postId;
+        commit('addComment', comment);
+        dispatch('fetchComments', postId);
       } catch (error) {
         console.error('댓글을 추가하는 중 에러 발생:', error);
       }
     },
     async updateComment({ commit }, updatedComment) {
-      // updatedComment를 서버에 전송하고 수정
-      try {
-        // 서버에 댓글을 수정하는 비동기 작업을 수행합니다.
-        // 성공하면 수정된 댓글의 정보를 받아옵니다.
+      try { 
         commit('updateComment', updatedComment);
       } catch (error) {
         console.error('댓글을 수정하는 중 에러 발생:', error);
@@ -143,19 +147,29 @@ const store = createStore({
     async deleteComment({ commit }, commentId) {
       // commentId에 해당하는 댓글을 서버에서 삭제
       try {
-        // 서버에서 댓글을 삭제하는 비동기 작업을 수행합니다.
+        
         commit('deleteComment', commentId);
       } catch (error) {
         console.error('댓글을 삭제하는 중 에러 발생:', error);
       }
     },
-    // 새로운 게시글 추가를 위한 action
-    
+       
     addPost({ commit, state }, newPost) {
       newPost.id = Date.now().toString(); // 새로운 ID 생성
       const updatedPosts = [...state.posts, newPost];
       commit('setPosts', updatedPosts);
       router.push({ name: 'SelectedPostPage', params: { postId: newPost.id } });
+    },
+    searchPosts({ commit, state }) {
+      const query = state.searchQuery.trim().toLowerCase();
+      if (query === '') {
+        commit('setFilteredPosts', state.posts);
+      } else {
+        const filtered = state.posts.filter(post =>
+          post.title.toLowerCase().includes(query)
+        );
+        commit('setFilteredPosts', filtered);
+      }
     },
   },
   getters: {

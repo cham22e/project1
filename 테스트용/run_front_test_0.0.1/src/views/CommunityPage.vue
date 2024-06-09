@@ -10,6 +10,7 @@
           v-model="searchQuery"
           placeholder="검색어 입력"
           size="sm"
+          @keyup.enter="searchPosts"
         />
         <button class="btn-search" @click="searchPosts">검색</button>
         <button class="btn-write" @click="goToWritePage">게시글 작성</button>
@@ -64,6 +65,7 @@
     </section>
   </div>
 </template>
+
 <script>
   import { computed, ref } from 'vue';
   import { useRouter } from 'vue-router';
@@ -93,6 +95,7 @@
       });
 
       const paginatedPosts = computed(() => {
+        if (!filteredPosts.value) return [];
         const start = (currentPage.value - 1) * itemsPerPage;
         const end = start + itemsPerPage;
         return filteredPosts.value.slice(start, end);
@@ -103,12 +106,8 @@
       });
 
       const searchPosts = () => {
-        const matchingPost = filteredPosts.value[0];
-        if (matchingPost) {
-          selectedPostId.value = matchingPost.id;
-        } else {
-          alert('검색어에 해당하는 게시글이 없습니다.');
-        }
+        store.commit('setSearchQuery', searchQuery.value);
+        store.dispatch('searchPosts');
       };
 
       const changePage = (page) => {

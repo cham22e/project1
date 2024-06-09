@@ -1,5 +1,5 @@
 <template>
-  <div class="materialContainer">
+  <div class="my-page">
     <div class="box">
       <h1>My Page</h1>
       <p>Email: {{ getUser }}</p>
